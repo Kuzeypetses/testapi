@@ -1,58 +1,48 @@
-# Arvento API Test Worker V1
+# Arvento API Test Worker V2
 
-Bu paket sadece Arvento REST API erisimini test eder. Mevcut ST haritasini degistirmez.
+Bu paket Arvento erisimini iki adimda test eder:
 
-## GitHub -> Cloudflare Worker
+1. REST: `GET https://ws.arvento.com/api/v1/vehicle` - HTTP Basic username/password
+2. REST basarisizsa klasik Arvento Web Service: `GetVehicleStatusV3` - Username + PIN1 + PIN2
 
-1. Bu klasorun icindekileri yeni bir GitHub reposuna yukleyin.
-2. Cloudflare Dashboard -> Workers & Pages -> Create -> Import a repository.
-3. Repo'yu secin ve deploy edin.
-4. Worker acildiktan sonra Settings -> Variables and Secrets bolumune gidin.
+Mevcut ST haritasini degistirmez.
 
-### Secret olarak ekleyin
+## Cloudflare Secrets
 
-- `ARVENTO_USERNAME` = Arvento yetkili kullanici adiniz
-- `ARVENTO_PASSWORD` = Arvento sifreniz
-- `ARVENTO_TEST_KEY` = Sizin belirleyeceginiz guclu bir test erisim anahtari
+Worker -> Settings -> Variables and Secrets bolumunde asagidaki 5 degeri **Secret** olarak ekleyin:
 
-Bu 3 degerin tipi **Secret** olmali. GitHub'a, wrangler.toml'a veya kaynak koda gercek degerleri yazmayin.
+- `ARVENTO_USERNAME`
+- `ARVENTO_PASSWORD`
+- `ARVENTO_PIN1`
+- `ARVENTO_PIN2`
+- `ARVENTO_TEST_KEY`
 
-### Normal Variables
+PIN1 ve PIN2 size verilen parola ile ayni ise ayni degeri bu iki Secret'a da yazabilirsiniz.
 
-Paketin `wrangler.toml` dosyasinda hazir gelir:
+Gercek degerleri GitHub'a, README'ye veya `wrangler.toml` dosyasina yazmayin.
 
-- `ARVENTO_API_BASE=https://ws.arvento.com/api`
-- `ARVENTO_VEHICLE_PATH=/v1/vehicle`
-- `ARVENTO_AUTH_MODE=BASIC`
+## Deploy
 
-Ilk testte bunlari degistirmeyin.
+V1 reposunu kullaniyorsaniz repo icindeki dosyalari V2 ile degistirip commit/push etmeniz yeterlidir. Worker adi ayni tutuldu: `arvento-api-test`.
 
 ## Test
 
-Worker URL'sini acin. Ornegin:
+Worker URL'sini acin. Yalnizca `ARVENTO_TEST_KEY` degerini ekrana yazip **Arvento'yu Test Et** butonuna basin.
 
-`https://arvento-api-test.<hesabiniz>.workers.dev/`
+V2 once REST yolunu dener. REST calismazsa PIN1/PIN2 tanimliysa otomatik olarak `GetVehicleStatusV3` HTTP POST servisini dener.
 
-Sayfadaki tek alana `ARVENTO_TEST_KEY` icin belirlediginiz degeri yazin ve **Arvento'yu Test Et** butonuna basin.
-
-### Basarili sonuc
+Basarili klasik servis sonucunda ekranda:
 
 - `ok: true`
-- `upstreamStatus: 200`
-- JSON arac listesi veya arac listesini iceren obje gorunur.
+- `workingMode: "GETVEHICLESTATUSV3"`
+- arac sayisi
+- ilk birkac aracin plaka / koordinat / hiz / tarih gibi ornek alanlari
 
-### 401 / 403 sonucu
-
-Bu, `GET /api/v1/vehicle` endpoint'inin erisilebilir oldugunu ancak normal username/password ile **Basic Authentication** kabul etmedigini gosterir. Bu durumda Arvento'dan REST API icin gereken token/API key/authentication yontemini netlestiririz veya PIN1/PIN2 ile Report Web Service'e geceriz.
-
-### Neden ARVENTO_TEST_KEY var?
-
-Basarili REST cevabi arac/plaka/konum gibi hassas operasyonel veriler icerebilir. Bu nedenle test endpoint'i herkese acik bir URL uzerinden dogrudan cevap vermez.
+gosterilir.
 
 ## Guvenlik
 
-- Kullanici adi/sifre browser'a gonderilmez.
-- Kullanici adi/sifre HTML veya JavaScript'e gomulmez.
-- Cloudflare Secret olarak tutulur.
-- Worker loglarina credential yazdirilmaz.
-- Test sadece GET arac listesi endpoint'ini cagirir; Arvento'da veri degisikligi yapmaz.
+- Arvento credential'lari browser'a gonderilmez.
+- Credential'lar test sonucuna yazdirilmaz.
+- Test endpoint'i `ARVENTO_TEST_KEY` ile korunur.
+- Her iki test de sadece veri okur; Arvento tarafinda kayit degisikligi yapmaz.
