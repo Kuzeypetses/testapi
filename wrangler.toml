@@ -1,0 +1,8 @@
+name = "arvento-api-test"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+
+[vars]
+ARVENTO_API_BASE = "https://ws.arvento.com/api"
+ARVENTO_VEHICLE_PATH = "/v1/vehicle"
+ARVENTO_AUTH_MODE = "BASIC"
