@@ -3,7 +3,6 @@ main = "src/index.js"
 compatibility_date = "2026-10-01"
 
 [vars]
-ARVENTO_API_BASE = "https://ws.arvento.com/api"
-ARVENTO_VEHICLE_PATH = "/v1/vehicle"
 ARVENTO_REPORT_BASE = "https://ws.arvento.com/v1/report.asmx"
 ARVENTO_LANGUAGE = "tr"
+ARVENTO_GROUP = ""

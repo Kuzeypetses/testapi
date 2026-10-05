@@ -1,48 +1,34 @@
-# Arvento API Test Worker V2
+# Arvento API Test Worker V3
 
-Bu paket Arvento erisimini iki adimda test eder:
+Bu sürüm REST API'yi test etmez. Arvento'nun klasik Report Web Service tarafındaki 3 metot yetkisini ayrı ayrı kontrol eder:
 
-1. REST: `GET https://ws.arvento.com/api/v1/vehicle` - HTTP Basic username/password
-2. REST basarisizsa klasik Arvento Web Service: `GetVehicleStatusV3` - Username + PIN1 + PIN2
+- `GetNodes`
+- `GetLicensePlateNodeMappings`
+- `GetVehicleStatusV3`
 
-Mevcut ST haritasini degistirmez.
+## Cloudflare Runtime Secrets
 
-## Cloudflare Secrets
-
-Worker -> Settings -> Variables and Secrets bolumunde asagidaki 5 degeri **Secret** olarak ekleyin:
+Worker > Settings > Variables and Secrets bölümünde Secret olarak:
 
 - `ARVENTO_USERNAME`
-- `ARVENTO_PASSWORD`
 - `ARVENTO_PIN1`
 - `ARVENTO_PIN2`
 - `ARVENTO_TEST_KEY`
 
-PIN1 ve PIN2 size verilen parola ile ayni ise ayni degeri bu iki Secret'a da yazabilirsiniz.
+`ARVENTO_PASSWORD` V3 testinde kullanılmaz; istersen mevcut Worker'da kalabilir.
 
-Gercek degerleri GitHub'a, README'ye veya `wrangler.toml` dosyasina yazmayin.
+## Normal vars
 
-## Deploy
+`wrangler.toml` içinde hazır:
 
-V1 reposunu kullaniyorsaniz repo icindeki dosyalari V2 ile degistirip commit/push etmeniz yeterlidir. Worker adi ayni tutuldu: `arvento-api-test`.
+- `ARVENTO_REPORT_BASE=https://ws.arvento.com/v1/report.asmx`
+- `ARVENTO_LANGUAGE=tr`
+- `ARVENTO_GROUP=` (boş)
 
-## Test
+## Kullanım
 
-Worker URL'sini acin. Yalnizca `ARVENTO_TEST_KEY` degerini ekrana yazip **Arvento'yu Test Et** butonuna basin.
+Deploy sonrası Worker ana adresini açın. `ARVENTO_TEST_KEY` değerini yazıp **3 Metodu Test Et** butonuna basın.
 
-V2 once REST yolunu dener. REST calismazsa PIN1/PIN2 tanimliysa otomatik olarak `GetVehicleStatusV3` HTTP POST servisini dener.
+Sonuçta her metot için ayrı `authorized`, `accessDenied`, `upstreamStatus`, `diagnostic` alanları gösterilir.
 
-Basarili klasik servis sonucunda ekranda:
-
-- `ok: true`
-- `workingMode: "GETVEHICLESTATUSV3"`
-- arac sayisi
-- ilk birkac aracin plaka / koordinat / hiz / tarih gibi ornek alanlari
-
-gosterilir.
-
-## Guvenlik
-
-- Arvento credential'lari browser'a gonderilmez.
-- Credential'lar test sonucuna yazdirilmaz.
-- Test endpoint'i `ARVENTO_TEST_KEY` ile korunur.
-- Her iki test de sadece veri okur; Arvento tarafinda kayit degisikligi yapmaz.
+`/health` sadece secretların tanımlı olup olmadığını true/false olarak gösterir; secret değerlerini göstermez.
